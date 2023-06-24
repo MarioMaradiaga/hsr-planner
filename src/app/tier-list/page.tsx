@@ -1,4 +1,4 @@
-import { charactersClient } from "@/clients";
+import { wikiClient } from "@/clients/wiki";
 import { TierListRating } from "@/types/characters";
 import Image from "next/image";
 
@@ -17,7 +17,7 @@ const tierToColorMap = {
 
 const CharacterPortrait = ({ name }: { name: string }) => {
   return (
-    <div>
+    <div className="w-10">
       <Image
         className="w-full"
         src="/arlan-portrait.webp"
@@ -37,7 +37,7 @@ const CharacterPortrait = ({ name }: { name: string }) => {
 };
 
 export default async function TierList() {
-  const data = await charactersClient.getTierList();
+  const data = await wikiClient.getTierList();
   return (
     <div className="grid gap-4">
       {data.tiers.map((tier) => (

@@ -1,5 +1,9 @@
-import { TierList } from "@/types/characters";
+import { GetCharactersResponse, GetTierListResponse } from "@/types/characters";
 
 export abstract class ICharactersClient {
-  abstract getTierList(): TierList;
+  abstract getCharacters(): Promise<GetCharactersResponse>;
+}
+
+export abstract class IWikiClient {
+  abstract getTierList(): GetTierListResponse;
 }

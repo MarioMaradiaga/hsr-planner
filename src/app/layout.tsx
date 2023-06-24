@@ -1,7 +1,8 @@
+import "flowbite";
 import { Navbar } from "@/components/navbar";
 import "./globals.css";
 import { Inter } from "next/font/google";
-import Script from "next/script";
+import { InitFlowbite } from "@/components/init-flowbite";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,8 +22,8 @@ export default function RootLayout({
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
       </head>
       <body className={inter.className}>
+        <InitFlowbite />
         <Navbar>{children}</Navbar>
-        <Script src="../path/to/flowbite/dist/flowbite.min.js"></Script>
       </body>
     </html>
   );
