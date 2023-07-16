@@ -1,10 +1,14 @@
+import fs from "fs";
+import path from "path";
 import {
   EidolonLevel,
+  GetCharacterByNameResponse,
   GetCharactersResponse,
   Rarity,
 } from "@/types/characters";
 import { ICharactersClient } from "./interfaces";
 import { z } from "zod";
+import hoyolabResponse from "@/data/hoyolab.json";
 
 const elementSchema = z.union([
   z.literal("fire"),
@@ -70,7 +74,7 @@ const rankSchema = z
     }
   });
 
-export const hoyoLabResponseSchema = z.object({
+export const hoyolabResponseSchema = z.object({
   data: z.object({
     avatar_list: z.array(
       z.object({
@@ -118,35 +122,11 @@ export const hoyoLabResponseSchema = z.object({
   }),
 });
 
-export class HoyoLabCharactersClient extends ICharactersClient {
+export class HoyolabCharactersClient extends ICharactersClient {
   private async fetchMasterData(): Promise<
-    z.infer<typeof hoyoLabResponseSchema>
+    z.infer<typeof hoyolabResponseSchema>
   > {
-    const hoyoLabResponse = await fetch(
-      "https://bbs-api-os.hoyolab.com/game_record/hkrpg/api/avatar/info?server=prod_official_asia&role_id=801856555",
-      {
-        headers: {
-          accept: "application/json, text/plain, */*",
-          "accept-language": "en-GB,en-US;q=0.9,en;q=0.8",
-          ds: "1687605843,EG6jAW,36befb1801efd7f23a0cbcd6c1693b13",
-          "x-rpc-app_version": "1.5.0",
-          "x-rpc-client_type": "5",
-          "x-rpc-language": "en-us",
-          cookie: `ltoken=${process.env.HOYOLAB_TOKEN}; ltuid=${process.env.HOYOLAB_ACCOUNT_ID};`,
-        },
-        referrer: "https://act.hoyolab.com/",
-        referrerPolicy: "strict-origin-when-cross-origin",
-        body: null,
-        method: "GET",
-        mode: "cors",
-        credentials: "include",
-      }
-    );
-    if (!hoyoLabResponse.ok) {
-      throw new Error(`fetching Hoyo Lab data`);
-    }
-    const jsonResponse = await hoyoLabResponse.json();
-    return hoyoLabResponseSchema.parse(jsonResponse);
+    return hoyolabResponseSchema.parse(hoyolabResponse);
   }
 
   async getCharacters(): Promise<GetCharactersResponse> {
@@ -156,6 +136,22 @@ export class HoyoLabCharactersClient extends ICharactersClient {
       characters: data.data.avatar_list,
     };
   }
+
+  async getCharacterByName(name: string): Promise<GetCharacterByNameResponse> {
+    const data = await this.fetchMasterData();
+
+    const character = data.data.avatar_list.find(
+      (c) => c.name.replaceAll(" ", "-").toLowerCase() === name
+    );
+
+    if (!character) {
+      throw new Error(`finding character with name "${name}"`);
+    }
+
+    return {
+      character,
+    };
+  }
 }
 
-export const charactersClient = new HoyoLabCharactersClient();
+export const charactersClient = new HoyolabCharactersClient();
